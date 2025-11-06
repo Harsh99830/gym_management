@@ -38,6 +38,7 @@ const allowedOrigins = [
   'https://gymfit-phi.vercel.app',
   'https://gymfit-phi.vercel.app/',
   'https://gym-one-lake.vercel.app' 
+
 ];
 
 app.use(cors({
