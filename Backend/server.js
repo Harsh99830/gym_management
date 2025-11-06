@@ -37,7 +37,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'https://gymfit-phi.vercel.app',
   'https://gymfit-phi.vercel.app/',
-  'https://gym-one-lake.vercel.app'
+  'https://gym-one-lake.vercel.app' 
 ];
 
 app.use(cors({
