@@ -442,18 +442,17 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // First load users and plans quickly so the dashboard becomes interactive
         setIsLoading(true);
-        // Fetch users, payments, and plans
-        const [usersRes, paymentsRes, plansRes] = await Promise.all([
+        const [usersRes, plansRes] = await Promise.all([
           getAllUsers(),
-          getSuccessfulPayments(),
           getAllPlans()
         ]);
-        
+
         let users = usersRes.users || [];
         let payments = [];
         let plans = plansRes || [];
-        
+
         // Store plans data
         setPlansData(plans);
         // Print plan durations to browser console for debugging
@@ -463,55 +462,47 @@ const Home = () => {
           // console.log('📦 Plans fetched (raw):', plans);
         }
         
-        // Process payments data
-        if (paymentsRes.success && paymentsRes.transactions && paymentsRes.transactions.length > 0) {
-          // Filter successful payments
-          payments = paymentsRes.transactions.filter(transaction => {
-            const orderStatus = transaction.orderStatus?.toLowerCase();
-            return orderStatus === 'paid' || orderStatus === 'success';
-          });
-          
-          setPaymentsData(payments);
-          
-          // Log payment data for debugging
-          // console.log('\n' + '='.repeat(60));
-          // console.log('💰 SUCCESSFUL PAYMENTS DATA');
-          // console.log('='.repeat(60));
-          // console.log(`📊 Total Payments in Database: ${paymentsRes.transactions.length}`);
-          // console.log(`✅ Total Successful Payments: ${payments.length}`);
-          // console.log(`💸 Total Successful Amount: ₹${paymentsRes.cashfreeSummary?.totalAmount || 0}`);
-          
-          // payments.forEach((payment, index) => {
-          //   console.log(`--- Payment ${index + 1} ---`);
-          //   console.log(`👤 Name: ${payment.customerDetails?.customer_name || 'N/A'}`);
-          //   console.log(`📧 Email: ${payment.customerDetails?.customer_email || 'N/A'}`);
-          //   console.log(`💰 Amount: ₹${payment.orderAmount}`);
-          //   console.log(`✅ Status: ${payment.orderStatus}`);
-          //   console.log('');
-          // });
-          // console.log('='.repeat(60));
-        }
-        
-        // Merge users with payment data
+        // Merge users with any immediately-available payments (none yet) and show the dashboard
         const mergedUsers = mergeUsersWithPayments(users, payments);
-        
-        // console.log('\n🔄 MERGED USER DATA:');
-        // mergedUsers.forEach(user => {
-        //   if (user.orderAmount) {
-        //     console.log(`👤 ${user.name} (${user.email}): ₹${user.orderAmount}`);
-        //   }
-        // });
-        
         const categorized = categorizeUsers(mergedUsers);
         setUsersData(categorized);
-        
+
         // Update users in AdminContext
         updateUsers([...mergedUsers]);
-        
+
         setTableData(categorized.active);
         setFilteredData(categorized.active);
         // Hide Plan Type column
         setTableColumns(columns.active.filter(col => col.key !== 'planType'));
+
+        // Release the main loading overlay now — payments will be fetched in background and merged in
+        setIsLoading(false);
+
+        // Fetch payments in background (this can be slow) and merge when ready
+        (async () => {
+          try {
+            setIsLoadingPayments(true);
+            const paymentsRes = await getSuccessfulPayments();
+            if (paymentsRes && paymentsRes.success && Array.isArray(paymentsRes.transactions)) {
+              payments = paymentsRes.transactions.filter(transaction => {
+                const orderStatus = transaction.orderStatus?.toLowerCase();
+                return orderStatus === 'paid' || orderStatus === 'success';
+              });
+              setPaymentsData(payments);
+
+              const merged = mergeUsersWithPayments(users, payments);
+              const recategorized = categorizeUsers(merged);
+              setUsersData(recategorized);
+              updateUsers([...merged]);
+              setTableData(recategorized[activeTab] || []);
+              setFilteredData(recategorized[activeTab] || []);
+            }
+          } catch (e) {
+            console.warn('Background payments fetch failed:', e);
+          } finally {
+            setIsLoadingPayments(false);
+          }
+        })();
         
       } catch (err) {
         // console.error('Failed to fetch data:', err);
@@ -893,10 +884,12 @@ const Home = () => {
   };
 
   return (
-    <div className="p-5 max-w-7xl mx-auto">
+    // make this container positioned so the loading overlay can be scoped to dashboard only
+    <div className="p-5 max-w-7xl mx-auto relative">
       {isLoading && (
-        <div className="fixed inset-0 z-50 bg-black/10 backdrop-blur-sm flex items-center justify-center">
-          <div className="flex flex-col items-center gap-3 bg-white/80 rounded-lg p-6 shadow">
+        // local overlay scoped to this container instead of full-screen so sidebar stays visible
+        <div className="absolute inset-0 z-10 bg-white/60 flex items-center justify-center rounded-lg">
+          <div className="flex flex-col items-center gap-3 bg-white/90 rounded-lg p-6 shadow">
             <svg className="animate-spin h-8 w-8 text-blue-600" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
