@@ -143,14 +143,21 @@ export const getCurrentUser = async () => {
     });
     
     if (!response.ok) {
-      localStorage.removeItem('token');
+      // Only remove token on explicit authentication errors (401/403).
+      if (response.status === 401 || response.status === 403) {
+        console.warn('getCurrentUser: token invalid or expired, removing token from storage');
+        localStorage.removeItem('token');
+      } else {
+        console.warn(`getCurrentUser: non-auth error (status=${response.status}), keeping token`);
+      }
       return null;
     }
-    
+
     return await response.json();
   } catch (error) {
     console.error('Get current user error:', error);
-    localStorage.removeItem('token');
+    // Network or other unexpected error — don't remove the token here so reloads don't log the user out on transient failures
+    console.warn('getCurrentUser: network/error encountered, preserving token in localStorage');
     return null;
   }
 };

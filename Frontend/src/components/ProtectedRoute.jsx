@@ -37,15 +37,15 @@ const ProtectedRoute = ({ children, requireAuth = true, redirectTo = '/' }) => {
         } else {
           setIsUserAuthenticated(false);
           setIsAdminAuthenticated(false);
-          localStorage.removeItem('token');
-          localStorage.removeItem('isAdmin');
+          // Don't remove the token here; getCurrentUser will remove it only for 401/403.
+          console.warn('ProtectedRoute: user not authenticated (getCurrentUser returned null) — leaving token in storage for inspection');
         }
       } catch (error) {
         console.error('Auth check error:', error);
-        setIsUserAuthenticated(false);
-        setIsAdminAuthenticated(false);
-        localStorage.removeItem('token');
-        localStorage.removeItem('isAdmin');
+          setIsUserAuthenticated(false);
+          setIsAdminAuthenticated(false);
+          // On unexpected errors, avoid clearing token to prevent accidental logout on transient failures
+          console.warn('ProtectedRoute: encountered auth check error, preserving token in localStorage');
       } finally {
         setIsLoading(false);
       }
