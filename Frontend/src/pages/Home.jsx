@@ -807,7 +807,7 @@ const Home = () => {
       <footer className="bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800 py-3 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center text-sm text-gray-500">
-            © {new Date().getFullYear()} Gym Management System. All rights reserved.
+          Powered by HdMediaNetwork
           </div>
         </div>
       </footer>

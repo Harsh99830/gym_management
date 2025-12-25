@@ -13,7 +13,9 @@ import {
   FiCreditCard,
   FiActivity,
   FiClock,
-  FiTrendingUp
+  FiTrendingUp,
+  FiHeart,
+  FiTarget
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { getProfilePhoto, updateUserDetails } from '../utils/api';
@@ -29,10 +31,7 @@ const Profile = () => {
     email: '',
     mobile: '',
     dateOfBirth: '',
-    address: '',
-    emergencyContact: '',
-    medicalConditions: '',
-    fitnessGoals: ''
+    address: ''
   });
 
   useEffect(() => {
@@ -42,10 +41,7 @@ const Profile = () => {
         email: user.email || '',
         mobile: user.mobile || '',
         dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
-        address: user.address || '',
-        emergencyContact: user.emergencyContact || '',
-        medicalConditions: user.medicalConditions || '',
-        fitnessGoals: user.fitnessGoals || ''
+        address: user.address || ''
       });
       
       // Load profile photo if user has one
@@ -135,7 +131,7 @@ const Profile = () => {
   const membershipStatus = getMembershipStatus();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
@@ -143,8 +139,7 @@ const Profile = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">My Profile</h1>
-          <p className="text-gray-400">Manage your personal information and preferences</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-blue-900 mb-2">My Profile</h1>
         </motion.div>
 
         {/* Profile Card */}
@@ -152,14 +147,14 @@ const Profile = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700 shadow-2xl overflow-hidden"
+          className="bg-white rounded-2xl border border-blue-100 shadow-xl overflow-hidden"
         >
           {/* Profile Header */}
-          <div className="relative p-6 sm:p-8 bg-gradient-to-r from-purple-600/20 to-blue-600/20">
+          <div className="relative p-6 sm:p-8 bg-gradient-to-r from-blue-600 to-blue-700">
             <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
               {/* Profile Photo */}
               <div className="relative">
-                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center overflow-hidden">
+                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-white border-4 border-white shadow-md flex items-center justify-center overflow-hidden">
                   {profilePhoto ? (
                     <img 
                       src={profilePhoto} 
@@ -167,10 +162,10 @@ const Profile = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <FiUser className="w-12 h-12 sm:w-16 sm:h-16 text-white" />
+                    <FiUser className="w-12 h-12 sm:w-16 sm:h-16 text-blue-700" />
                   )}
                 </div>
-                <button className="absolute bottom-0 right-0 p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition-colors">
+                <button className="absolute bottom-0 right-0 p-2 bg-blue-600 rounded-full hover:bg-blue-700 transition-colors border-2 border-white">
                   <FiCamera className="w-4 h-4 text-white" />
                 </button>
               </div>
@@ -180,14 +175,14 @@ const Profile = () => {
                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
                   {user.name || 'User Name'}
                 </h2>
-                <p className="text-gray-400 mb-3">{user.email}</p>
+                <p className="text-blue-100 mb-3">{user.email}</p>
                 
                 {/* Membership Status */}
                 <div className="flex items-center justify-center sm:justify-start space-x-2 mb-4">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${membershipStatus.color} ${membershipStatus.bgColor}`}>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium bg-white/20 text-white border border-white/30`}>
                     {membershipStatus.status} Member
                   </span>
-                  <span className="text-gray-400 text-sm">
+                  <span className="text-blue-100 text-sm">
                     Since {formatDate(user.createdAt)}
                   </span>
                 </div>
@@ -214,10 +209,10 @@ const Profile = () => {
                         name="name"
                         value={editedUser.name}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-black placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     ) : (
-                      <p className="text-white bg-gray-700/30 px-4 py-3 rounded-lg">
+                      <p className="text-black bg-white/90 border border-gray-200 px-4 py-3 rounded-lg">
                         {user.name || 'Not specified'}
                       </p>
                     )}
@@ -229,7 +224,7 @@ const Profile = () => {
                       <FiMail className="w-4 h-4 inline mr-1" />
                       Email Address
                     </label>
-                    <p className="text-white bg-gray-700/30 px-4 py-3 rounded-lg">
+                    <p className="text-black bg-white/90 border border-gray-200 px-4 py-3 rounded-lg">
                       {user.email}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
@@ -247,11 +242,11 @@ const Profile = () => {
                         name="mobile"
                         value={editedUser.mobile}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-black placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Enter mobile number"
                       />
                     ) : (
-                      <p className="text-white bg-gray-700/30 px-4 py-3 rounded-lg">
+                      <p className="text-black bg-white/90 border border-gray-200 px-4 py-3 rounded-lg">
                         {user.mobile || 'Not specified'}
                       </p>
                     )}
@@ -269,10 +264,10 @@ const Profile = () => {
                         name="dateOfBirth"
                         value={editedUser.dateOfBirth}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     ) : (
-                      <p className="text-white bg-gray-700/30 px-4 py-3 rounded-lg">
+                      <p className="text-black bg-white/90 border border-gray-200 px-4 py-3 rounded-lg">
                         {formatDate(user.dateOfBirth)}
                       </p>
                     )}
@@ -280,14 +275,13 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Additional Information */}
+              {/* Address Section */}
               <div>
                 <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
                   <FiMapPin className="w-5 h-5 mr-2 text-green-400" />
-                  Additional Information
+                  Address
                 </h3>
                 <div className="space-y-6">
-                  {/* Address */}
                   <div>
                     <label className="block text-sm font-medium text-gray-400 mb-2">Address</label>
                     {isEditing ? (
@@ -296,19 +290,15 @@ const Profile = () => {
                         value={editedUser.address}
                         onChange={handleInputChange}
                         rows="3"
-                        className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-black placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                         placeholder="Enter your address"
                       />
                     ) : (
-                      <p className="text-white bg-gray-700/30 px-4 py-3 rounded-lg min-h-[88px]">
+                      <p className="text-black bg-white/90 border border-gray-200 px-4 py-3 rounded-lg min-h-[88px]">
                         {user.address || 'Not specified'}
                       </p>
                     )}
                   </div>
-
-                
-
-                
                 </div>
               </div>
             </div>

@@ -17,7 +17,6 @@ const Settings = () => {
     email: '',
     mobile: '',
     dateOfBirth: '',
-    gender: '',
     address: ''
   });
 
@@ -43,7 +42,6 @@ const Settings = () => {
             email: userData.email || '',
             mobile: userData.mobile || '',
             dateOfBirth: userData.dateOfBirth ? userData.dateOfBirth.split('T')[0] : '',
-            gender: userData.gender || '',
             address: userData.address || ''
           });
         } else {
@@ -305,15 +303,24 @@ const Settings = () => {
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <FiMail className="h-5 w-5 text-gray-400" />
                       </div>
-                      <input
-                        type="email"
-                        name="email"
-                        id="email"
-                        value={profileData.email}
-                        onChange={handleProfileChange}
-                        className={`block w-full pl-10 pr-3 py-2 border ${errors.email ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
-                      />
+                      <div className="relative">
+                        <input
+                          type="email"
+                          name="email"
+                          id="email"
+                          value={profileData.email}
+                          readOnly
+                          className="block w-full pl-10 pr-3 py-2 bg-gray-100 border border-gray-300 text-gray-600 rounded-md shadow-sm sm:text-sm cursor-not-allowed"
+                          aria-label="Email address (cannot be changed)"
+                        />
+                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      </div>
                     </div>
+                    <p className="mt-1 text-xs text-gray-500">Contact support to change your email address</p>
                     {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
                   </div>
                   
@@ -355,25 +362,6 @@ const Settings = () => {
                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       />
                     </div>
-                  </div>
-                  
-                  <div className="sm:col-span-3">
-                    <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
-                      Gender
-                    </label>
-                    <select
-                      id="gender"
-                      name="gender"
-                      value={profileData.gender}
-                      onChange={handleProfileChange}
-                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                      <option value="prefer-not-to-say">Prefer not to say</option>
-                    </select>
                   </div>
                   
                   <div className="sm:col-span-6">
