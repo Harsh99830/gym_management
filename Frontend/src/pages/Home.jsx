@@ -469,10 +469,8 @@ const Home = () => {
     }, 100);
   };
 
-  // Removed the no-scroll effect to allow natural page scrolling
-
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900">
+    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900">
       <Navbar />
       
       {/* Welcome Section */}
@@ -480,7 +478,7 @@ const Home = () => {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-purple-900 to-blue-900 py-8 px-4 sm:px-6 lg:px-8"
+          className="bg-gradient-to-r from-purple-900 to-blue-900 py-4 px-4 sm:px-6 lg:px-8 flex-shrink-0"
         >
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between">
@@ -509,12 +507,7 @@ const Home = () => {
             <div className="w-full bg-gradient-to-br from-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
               <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-12">
-                  <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl mb-4">
-                    Welcome to Your Membership
-                  </h1>
-                  <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Manage your fitness journey with us
-                  </p>
+                  <div className="h-12 sm:h-16"></div>
                 </div>
 
                 <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 md:p-10 max-w-5xl mx-auto pointer-events-auto">
@@ -665,7 +658,7 @@ const Home = () => {
                       className="flex-1 max-w-xs flex items-center justify-center gap-2 border-2 border-gray-200 bg-white text-gray-700 hover:bg-gray-50 font-medium py-3 px-6 rounded-lg transition-all duration-200 cursor-pointer hover:shadow-md active:scale-95"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h2a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h2a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       Get Help
                     </button>
@@ -742,8 +735,8 @@ const Home = () => {
       </div>
 
       {/* Main Content */}
-      <div id="plans" className="relative z-10 flex-grow">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="flex-grow overflow-y-auto">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           {/* View Plans Section */}
           {!latestPayment && !isLoadingPayment && user && !isAdmin && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-12">
@@ -810,10 +803,10 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Footer - This will be pushed to the bottom */}
-      <footer className="bg-gradient-to-br from-gray-100 text-gray-800 py-6 mt-auto">
+      {/* Footer - Fixed at bottom */}
+      <footer className="bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800 py-3 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-sm text-gray-400">
+          <div className="text-center text-sm text-gray-500">
             © {new Date().getFullYear()} Gym Management System. All rights reserved.
           </div>
         </div>

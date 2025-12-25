@@ -129,25 +129,25 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl overflow-hidden">
-          <div className="h-2 bg-gradient-to-r from-purple-600 to-pink-500"></div>
+        <div className="bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-200">
+          <div className="h-2 bg-gradient-to-r from-blue-600 to-blue-400"></div>
           
           <div className="p-8">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-2">Create Account</h2>
-              <p className="text-gray-400">Join our fitness community today</p>
+              <h2 className="text-3xl font-bold text-blue-800 mb-2">Create Account</h2>
+              <p className="text-blue-600">Join our fitness community today</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="name" className="block text-sm font-medium text-blue-900 mb-1">
                   Full Name
                 </label>
                 <input
@@ -156,15 +156,15 @@ const SignUp = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 bg-gray-700/50 border ${errors.name ? 'border-red-500' : 'border-gray-600'} rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400`}
+                  className={`w-full px-4 py-3 bg-white border ${errors.name ? 'border-red-500' : 'border-gray-200'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 placeholder-gray-400`}
                   placeholder="Enter your full name"
                   required
                 />
-                {errors.name && <p className="mt-1 text-sm text-red-400">{errors.name}</p>}
+                {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="email" className="block text-sm font-medium text-blue-900 mb-1">
                   Email
                 </label>
                 <input
@@ -173,15 +173,15 @@ const SignUp = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 bg-gray-700/50 border ${errors.email ? 'border-red-500' : 'border-gray-600'} rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400`}
+                  className={`w-full px-4 py-3 bg-white border ${errors.email ? 'border-red-500' : 'border-gray-200'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 placeholder-gray-400`}
                   placeholder="Enter your email"
                   required
                 />
-                {errors.email && <p className="mt-1 text-sm text-red-400">{errors.email}</p>}
+                {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
               </div>
 
               <div>
-                <label htmlFor="mobile" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="mobile" className="block text-sm font-medium text-blue-900 mb-1">
                   Mobile Number
                 </label>
                 <input
@@ -190,16 +190,16 @@ const SignUp = () => {
                   name="mobile"
                   value={formData.mobile}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 bg-gray-700/50 border ${errors.mobile ? 'border-red-500' : 'border-gray-600'} rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400`}
+                  className={`w-full px-4 py-3 bg-white border ${errors.mobile ? 'border-red-500' : 'border-gray-200'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 placeholder-gray-400`}
                   placeholder="Enter your 10-digit mobile number"
                   maxLength="10"
                   required
                 />
-                {errors.mobile && <p className="mt-1 text-sm text-red-400">{errors.mobile}</p>}
+                {errors.mobile && <p className="mt-1 text-sm text-red-500">{errors.mobile}</p>}
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="password" className="block text-sm font-medium text-blue-900 mb-1">
                   Password
                 </label>
                 <input
@@ -208,15 +208,15 @@ const SignUp = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 bg-gray-700/50 border ${errors.password ? 'border-red-500' : 'border-gray-600'} rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400`}
-                  placeholder="Create a password (min 6 characters)"
+                  className={`w-full px-4 py-3 bg-white border ${errors.password ? 'border-red-500' : 'border-gray-200'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 placeholder-gray-400`}
+                  placeholder="Enter your password"
                   required
                 />
-                {errors.password && <p className="mt-1 text-sm text-red-400">{errors.password}</p>}
+                {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-blue-900 mb-1">
                   Confirm Password
                 </label>
                 <input
@@ -225,17 +225,17 @@ const SignUp = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 bg-gray-700/50 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-600'} rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400`}
+                  className={`w-full px-4 py-3 bg-white border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-200'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 placeholder-gray-400`}
                   placeholder="Confirm your password"
                   required
                 />
-                {errors.confirmPassword && <p className="mt-1 text-sm text-red-400">{errors.confirmPassword}</p>}
+                {errors.confirmPassword && <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>}
               </div>
 
               {showOtpField ? (
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="otp" className="block text-sm font-medium text-gray-300 mb-1">
+                    <label htmlFor="otp" className="block text-sm font-medium text-blue-900 mb-1">
                       Enter OTP
                     </label>
                     <input
@@ -244,19 +244,19 @@ const SignUp = () => {
                       name="otp"
                       value={formData.otp}
                       onChange={handleChange}
-                      className={`w-full px-4 py-3 bg-gray-700/50 border ${errors.otp ? 'border-red-500' : 'border-gray-600'} rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400`}
+                      className={`w-full px-4 py-3 bg-white border ${errors.otp ? 'border-red-500' : 'border-gray-200'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 placeholder-gray-400`}
                       placeholder="Enter 6-digit OTP"
                       maxLength="6"
                       required
                     />
-                    {errors.otp && <p className="mt-1 text-sm text-red-400">{errors.otp}</p>}
-                    <div className="mt-2 text-sm text-gray-400">
+                    {errors.otp && <p className="mt-1 text-sm text-red-500">{errors.otp}</p>}
+                    <div className="mt-2 text-sm text-blue-600">
                       Didn't receive OTP?{' '}
                       <button
                         type="button"
                         onClick={handleResendOtp}
                         disabled={otpCountdown > 0}
-                        className="text-purple-400 hover:text-purple-300 font-medium disabled:opacity-50"
+                        className="text-blue-700 hover:text-blue-900 font-medium disabled:opacity-50"
                       >
                         {otpCountdown > 0 ? `Resend in ${otpCountdown}s` : 'Resend OTP'}
                       </button>
@@ -266,17 +266,9 @@ const SignUp = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className={`w-full ${isLoading ? 'bg-purple-400' : 'bg-purple-600 hover:bg-purple-700'} text-white font-medium py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center`}
+                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isLoading ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Verifying...
-                      </>
-                    ) : 'Verify & Create Account'}
+                    {isLoading ? 'Creating Account...' : 'Create Account'}
                   </button>
                 </div>
               ) : (
@@ -284,25 +276,17 @@ const SignUp = () => {
                   type="button"
                   onClick={handleSendOtp}
                   disabled={isLoading}
-                  className={`w-full ${isLoading ? 'bg-purple-400' : 'bg-purple-600 hover:bg-purple-700'} text-white font-medium py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center`}
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Sending OTP...
-                    </>
-                  ) : 'Send OTP'}
+                  {isLoading ? 'Sending OTP...' : 'Send OTP'}
                 </button>
               )}
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-gray-400">
+              <p className="text-sm text-blue-600">
                 Already have an account?{' '}
-                <Link to="/login" className="text-purple-400 hover:text-purple-300 font-medium">
+                <Link to="/login" className="font-medium text-blue-700 hover:text-blue-900 hover:underline">
                   Sign in
                 </Link>
               </p>
