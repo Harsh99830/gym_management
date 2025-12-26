@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { Table, Button, Tooltip } from 'antd';
+import { Table, Button, Tooltip, Card, Tag, Typography, Space } from 'antd';
 import { updateUserStatus } from '../utils/api';
+import { UserOutlined, PhoneOutlined, MailOutlined, ClockCircleOutlined } from '@ant-design/icons';
+
+const { Title, Text } = Typography;
 
 const TerminatedUsers = ({ users = [], onReinstate }) => {
   const [loadingIds, setLoadingIds] = useState(new Set());
@@ -28,78 +31,127 @@ const TerminatedUsers = ({ users = [], onReinstate }) => {
   };
 
   const columns = [
-    { title: 'Name', dataIndex: 'name', key: 'name' },
     {
-      title: 'Source',
-      key: 'source',
-      render: (_, record) => {
-        const isManual = (record.planType || '').toLowerCase() === 'manual';
-        return isManual ? (
-          <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">Manual</span>
-        ) : null;
-      }
+      title: 'User',
+      key: 'user',
+      render: (_, record) => (
+        <div className="flex items-center">
+          <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 mr-3">
+            <UserOutlined />
+          </div>
+          <div>
+            <div className="font-medium text-gray-900">{record.name || 'No Name'}</div>
+            <div className="text-sm text-gray-500 flex items-center">
+              <MailOutlined className="mr-1" />
+              {record.email || 'No email'}
+            </div>
+          </div>
+        </div>
+      ),
     },
-    { title: 'Email', dataIndex: 'email', key: 'email' },
     {
-      title: 'Phone',
-      dataIndex: 'mobile',
-      key: 'mobile',
-      render: (mobile, record) => record.mobile || record.phone || 'N/A'
+      title: 'Contact',
+      key: 'contact',
+      render: (_, record) => (
+        <div className="text-sm">
+          <div className="flex items-center text-gray-600 mb-1">
+            <PhoneOutlined className="mr-2" />
+            {record.mobile || record.phone || 'N/A'}
+          </div>
+          {record.source && (
+            <Tag color={record.source.toLowerCase() === 'manual' ? 'blue' : 'default'} className="text-xs">
+              {record.source}
+            </Tag>
+          )}
+        </div>
+      ),
     },
     {
-      title: 'Account Status',
-      key: 'accountStatus',
+      title: 'Status',
+      key: 'status',
       render: (_, record) => {
-        const s = (record.accountStatus || '').toLowerCase();
-        const label = s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Unknown';
+        const status = (record.accountStatus || '').toLowerCase();
+        const statusConfig = {
+          terminated: { color: 'red', label: 'Terminated' },
+          inactive: { color: 'orange', label: 'Inactive' },
+          active: { color: 'green', label: 'Active' },
+        };
+        const config = statusConfig[status] || { color: 'default', label: 'Unknown' };
+        
         return (
-          <span className={`px-2 py-1 rounded-full text-xs ${s === 'terminated' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
-            {label}
-          </span>
+          <Tag color={config.color} className="capitalize">
+            {config.label}
+          </Tag>
         );
-      }
+      },
     },
     {
-      title: 'Terminated On',
+      title: 'Termination Date',
       key: 'terminatedOn',
       render: (_, record) => {
         const d = record.updatedAt ? new Date(record.updatedAt) : record.terminatedAt ? new Date(record.terminatedAt) : null;
-        return d && !isNaN(d) ? d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
-      }
+        return d && !isNaN(d) ? (
+          <div className="flex items-center text-sm text-gray-600">
+            <ClockCircleOutlined className="mr-1" />
+            {d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+          </div>
+        ) : '—';
+      },
     },
     {
-      title: '',
+      title: 'Actions',
       key: 'actions',
-      fixed: 'right',
-      width: 120,
+      align: 'right',
       render: (_, record) => (
-        <Tooltip title="Set to Inactive">
-          <Button
-            size="small"
-            type="default"
-            className="border-gray-300 text-gray-700 hover:text-gray-900"
-            loading={loadingIds.has(record._id)}
-            onClick={() => handleSetInactive(record)}
-          >
-            Set Inactive
-          </Button>
-        </Tooltip>
-      )
-    }
+        <Button
+          type="primary"
+          ghost
+          size="small"
+          loading={loadingIds.has(record._id)}
+          onClick={() => handleSetInactive(record)}
+          className="hover:bg-blue-50"
+        >
+          Set to Inactive
+        </Button>
+      ),
+    },
   ];
 
   return (
-    <div className="rounded-lg border border-gray-200 overflow-x-auto">
+    <Card 
+      className="shadow-sm border-0"
+      title={
+        <div className="flex justify-between items-center">
+          <div>
+            <Title level={4} className="m-0">Terminated Users</Title>
+            <Text type="secondary" className="text-sm">
+              {users.length} user{users.length !== 1 ? 's' : ''} terminated
+            </Text>
+          </div>
+        </div>
+      }
+    >
       <Table
         columns={columns}
         dataSource={users}
         rowKey="_id"
-        pagination={false}
+        pagination={{ pageSize: 8, showSizeChanger: false }}
         scroll={{ x: 'max-content' }}
-        className="min-w-full [&_.ant-table-thead>tr>th]:bg-gray-50 [&_.ant-table-thead>tr>th]:text-gray-600 [&_.ant-table-tbody>tr>td]:text-gray-700"
-        locale={{ emptyText: 'No terminated users' }}
+        className="[&_.ant-table-thead>tr>th]:bg-white [&_.ant-table-thead>tr>th]:text-gray-500 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-tbody>tr>td]:text-gray-700 [&_.ant-table-tbody>tr>td]:py-4 [&_.ant-table-tbody>tr:hover>td]:bg-blue-50"
+        locale={{
+          emptyText: (
+            <div className="py-12 text-center">
+              <div className="text-gray-400 mb-2">
+                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <Text type="secondary">No terminated users found</Text>
+            </div>
+          )
+        }}
       />
-    </div>
+    </Card>
   );
 };
 

@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -79,57 +80,73 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex items-center justify-center p-4">
-      <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl overflow-hidden w-full max-w-xs p-6">
-        <h3 className="text-lg font-semibold text-white mb-4 text-center">Admin Login</h3>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-xs"
+      >
+        <div className="bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-200">
+          <div className="h-2 bg-gradient-to-r from-blue-600 to-blue-400"></div>
+          <div className="p-8">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-blue-800 mb-2">Admin Login</h2>
+            </div>
         {!showOtp ? (
           <form onSubmit={handleEmailVerify} className="space-y-4">
             <div>
-              <label htmlFor="adminEmail" className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+              <label htmlFor="adminEmail" className="block text-sm font-medium text-blue-900 mb-1">Email</label>
               <input
                 type="email"
                 id="adminEmail"
                 name="adminEmail"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400"
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 placeholder-gray-400"
                 placeholder="Enter admin email"
                 required
               />
             </div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`w-full ${isLoading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'} text-white font-medium py-2 px-4 rounded transition duration-200`}
-            >
-              {isLoading ? 'Verifying...' : 'Verify Email'}
-            </button>
+            <div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Verifying...' : 'Verify Email'}
+              </button>
+            </div>
           </form>
         ) : (
           <form onSubmit={handleOtpVerify} className="space-y-4">
             <div>
-              <label htmlFor="adminOtp" className="block text-sm font-medium text-gray-300 mb-1">OTP</label>
+              <label htmlFor="adminOtp" className="block text-sm font-medium text-blue-900 mb-1">OTP</label>
               <input
                 type="text"
                 id="adminOtp"
                 name="adminOtp"
                 value={otp}
                 onChange={e => setOtp(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400"
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 placeholder-gray-400"
                 placeholder="Enter OTP"
                 required
               />
             </div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`w-full ${isLoading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'} text-white font-medium py-2 px-4 rounded transition duration-200`}
-            >
-              {isLoading ? 'Verifying...' : 'Verify OTP'}
-            </button>
-          </form>
-        )}
-      </div>
+            <div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Verifying...' : 'Verify OTP'}
+              </button>
+            </div>
+            </form>
+          )}
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 };
