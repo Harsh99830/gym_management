@@ -15,6 +15,7 @@ import ForgotPassword from './auth/ForgotPassword';
 import PaymentStatus from './pages/PaymentStatus';
 import Profile from './pages/Profile';
 import Plan from './pages/Plan';
+import Checkout from './pages/Checkout';
 import Settings from './pages/Settings';
 import TerminatedUsersPage from './Admin/TerminatedUsersPage';
 import BranchesPage from './Admin/BranchesPage';
@@ -63,6 +64,9 @@ function AppContent() {
             <Navigate to="/" replace />
           } />
           <Route path="/contact" element={<ContactUs />} />
+          <Route path="/plan" element={<Plan />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/profile" element={<Profile />} />
 
           {/* Payment Status - Only accessible when coming from payment flow */}
           <Route path="/payment-status" element={<PaymentStatusRedirect />} />

@@ -410,87 +410,18 @@ const Home = () => {
     toast.success('Coupon removed');
   };
 
-  const handleGetStarted = async (plan) => {
+  const handleGetStarted = (plan) => {
     const appliedCoupon = appliedCoupons[plan._id];
-    const finalAmount = appliedCoupon ? appliedCoupon.finalAmount : plan.amount;
-    const couponCode = appliedCoupon ? appliedCoupon.code : '';
-    
-    await processSubscription({ ...plan, amount: finalAmount }, couponCode);
-  };
-
-  const processSubscription = async (plan, coupon = '') => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    
-    // Clear any previous payment status
-    localStorage.removeItem('paymentCompleted');
-    
-    setSelectedPlan(plan);
-    
-    // Load Cashfree script if not already loaded
-    loadCashfreeScript();
-
-    // Wait for Cashfree v2 to be available
-    const started = Date.now();
-    const iv = setInterval(async () => {
-      if (typeof window.Cashfree === 'function') {
-        clearInterval(iv);
-        try {
-          // Create payment session from local backend
-          const orderId = 'order_' + Date.now();
-          const orderAmount = plan.amount; // Use the numeric amount directly
-          const customerName = user?.name || 'Guest User';
-          const customerEmail = user?.email || 'guest@example.com';
-          const customerPhone = user?.mobile || '9999999999';
-          const returnUrl = window.location.origin + '/payment-status';
-
-          const { paymentSessionId } = await createCashfreeSession({
-            orderId,
-            orderAmount,
-            customerName,
-            customerEmail,
-            customerPhone,
-            returnUrl,
-            planType: plan.planType || plan.name, // Include plan type
-            planAmount: plan.amount, // Include plan amount
-            planDuration: plan.duration || 1, // Include plan duration
-            couponCode: coupon || ''
-          });
-
-          if (!paymentSessionId) throw new Error('No paymentSessionId received');
-
-          // v3 initialization (function, not class)
-          const cashfree = window.Cashfree({ mode: 'sandbox' });
-          await cashfree.checkout({
-            paymentSessionId,
-            redirectTarget: '_self',
-            onSuccess: () => {
-              // Set payment as completed in localStorage
-              localStorage.setItem('paymentCompleted', 'true');
-              setIsSubscribed(true);
-              setSelectedPlan(null);
-              toast.success('Payment successful! Your subscription is now active.');
-              // Redirect to home after successful payment
-              navigate('/');
-            },
-            onFailure: (data) => {
-              setSelectedPlan(null);
-              toast.error('Payment failed! ' + (data?.message || ''));
-            },
-          });
-        } catch (error) {
-          console.error('Cashfree v2 error:', error);
-          setSelectedPlan(null);
-          toast.error(error?.message || 'Payment service is currently unavailable. Please try again later.');
+    navigate('/checkout', {
+      state: {
+        plan: {
+          ...plan,
+          finalAmount: appliedCoupon ? appliedCoupon.finalAmount : plan.amount,
+          discountAmount: appliedCoupon?.discountAmount || 0,
+          couponCode: appliedCoupon?.code || ''
         }
-      } else if (Date.now() - started > 8000) {
-        clearInterval(iv);
-        setSelectedPlan(null);
-        toast.error('Payment service is currently unavailable. Please try again later.');
       }
-    }, 100);
+    });
   };
 
   // Prevent all scrolling by adding a class to the HTML element
@@ -689,68 +620,6 @@ const Home = () => {
                         </div>
                       </motion.div>
                       
-                      {/* Coupon Section */}
-                      {!appliedCoupons[plan._id] ? (
-                        <div className="mt-6 mb-4">
-                          <div className="flex items-center gap-1">
-                            <Input
-                              prefix={<FiTag className="text-gray-400" />}
-                              placeholder="Coupon code"
-                              value={couponCodes[plan._id] || ''}
-                              onChange={(e) => setCouponCodes(prev => ({
-                                ...prev,
-                                [plan._id]: e.target.value.toUpperCase()
-                              }))}
-                              className="flex-1"
-                              size="large"
-                              onPressEnter={() => handleApplyCoupon(plan)}
-                              status={couponErrors[plan._id] ? 'error' : ''}
-                            />
-                            <Button
-                              type="primary"
-                              size="large"
-                              onClick={() => handleApplyCoupon(plan)}
-                              loading={applyingCoupon[plan._id]}
-                              disabled={!couponCodes[plan._id]?.trim()}
-                              className="h-10 px-4"
-                            >
-                              Apply
-                            </Button>
-                          </div>
-                          {couponErrors[plan._id] && (
-                            <p className="mt-1 text-xs text-red-500 text-center">
-                              {couponErrors[plan._id]}
-                            </p>
-                          )}
-                          {!couponErrors[plan._id] && (
-                            <p className="mt-1 text-xs text-gray-400 text-center">
-                              Enter coupon code if you have one
-                            </p>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="mt-6 mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                              <FiCheckCircle className="text-green-600 mr-2" />
-                              <div>
-                                <p className="text-sm font-medium text-green-800">
-                                  {appliedCoupons[plan._id].code} Applied
-                                </p>
-                                <p className="text-xs text-green-600">
-                                  You saved ₹{appliedCoupons[plan._id].discountAmount.toLocaleString()}
-                                </p>
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => handleRemoveCoupon(plan)}
-                              className="text-green-600 hover:text-green-800 text-sm font-medium"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                      )}
 
                       {/* Updated Price Display */}
                       {appliedCoupons[plan._id] && (
@@ -772,39 +641,40 @@ const Home = () => {
                         </div>
                       )}
                       
-                      <motion.div 
-                        className="mt-4"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <Button
-                          onClick={() => handleGetStarted(plan)}
-                          loading={selectedPlan === plan}
-                          disabled={selectedPlan === plan}
-                          className={`w-full h-auto py-3.5 px-6 rounded-xl font-medium transition-all duration-300 ${
-                            selectedPlan === plan
-                              ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                              : plan.popular 
-                                ? 'bg-gray-900 text-white hover:bg-gray-800' 
-                                : 'bg-gray-100 text-gray-900 border border-gray-200 hover:bg-gray-50'
-                          }`}
+                      <div className="mt-4">
+                        <motion.div 
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
                         >
-                          {selectedPlan === plan ? (
-                            <span className="flex items-center justify-center">
-                              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
-                              Processing...
-                            </span>
-                          ) : (
-                            <span className="flex items-center justify-center">
-                              <FiCheckCircle className="mr-2" />
-                              Get Started
-                            </span>
-                          )}
-                        </Button>
-                      </motion.div>
+                          <Button
+                            onClick={() => handleGetStarted(plan)}
+                            loading={selectedPlan === plan}
+                            disabled={selectedPlan === plan}
+                            className={`w-full h-auto py-3.5 px-6 rounded-xl font-medium transition-all duration-300 ${
+                              selectedPlan === plan
+                                ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                                : plan.popular 
+                                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}
+                          >
+                            {selectedPlan === plan ? (
+                              <span className="flex items-center justify-center">
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Processing...
+                              </span>
+                            ) : (
+                              <span className="flex items-center justify-center">
+                                <FiCheckCircle className="mr-2" />
+                                Get Started
+                              </span>
+                            )}
+                          </Button>
+                        </motion.div>
+                      </div>
                     </div>
                   </div>
                 </div>
