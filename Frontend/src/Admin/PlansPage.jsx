@@ -31,9 +31,6 @@ const PlansPage = () => {
 
   const handleAddPlan = async (values) => {
     try {
-      if (values.features) {
-        values.features = values.features.split('\n').filter(f => f.trim());
-      }
       await createPlan(values);
       message.success('Plan created successfully');
       setShowAddPlanModal(false);
@@ -47,9 +44,6 @@ const PlansPage = () => {
 
   const handleUpdatePlan = async (values) => {
     try {
-      if (values.features) {
-        values.features = values.features.split('\n').filter(f => f.trim());
-      }
       await updatePlan(editingPlan._id, values);
       message.success('Plan updated successfully');
       setShowEditPlanModal(false);
@@ -86,8 +80,7 @@ const PlansPage = () => {
     setEditingPlan(plan);
     const formValues = {
       ...plan,
-      planType: plan.planType,
-      features: plan.features ? plan.features.join('\n') : ''
+      planType: plan.planType
     };
     editForm.setFieldsValue(formValues);
     setShowEditPlanModal(true);
@@ -127,19 +120,9 @@ const PlansPage = () => {
                 <DeleteOutlined key="delete" onClick={() => handleDeletePlan(plan._id)} />
               ]}
             >
-              <div className="space-y-2">
-                <p><strong>Amount:</strong> ₹{plan.amount}</p>
-                <p><strong>Duration:</strong> {plan.duration} month{plan.duration > 1 ? 's' : ''}</p>
-                {plan.features && plan.features.length > 0 && (
-                  <div>
-                    <strong>Features:</strong>
-                    <ul className="list-disc pl-5">
-                      {plan.features.map((feature, index) => (
-                        <li key={index}>{feature}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+              <div className="space-y-3">
+                <p className="text-lg font-semibold">₹{plan.amount}</p>
+                <p className="text-gray-600">{plan.duration} month{plan.duration > 1 ? 's' : ''}</p>
               </div>
             </Card>
           ))}
@@ -184,13 +167,6 @@ const PlansPage = () => {
           >
             <InputNumber min={1} style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item
-            name="features"
-            label="Features (one per line)"
-            help="Enter each feature on a new line"
-          >
-            <Input.TextArea rows={4} placeholder="Feature 1&#10;Feature 2&#10;Feature 3" />
-          </Form.Item>
         </Form>
       </Modal>
 
@@ -232,13 +208,6 @@ const PlansPage = () => {
             rules={[{ required: true, message: 'Please enter duration' }]}
           >
             <InputNumber min={1} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item
-            name="features"
-            label="Features (one per line)"
-            help="Enter each feature on a new line"
-          >
-            <Input.TextArea rows={4} placeholder="Feature 1&#10;Feature 2&#10;Feature 3" />
           </Form.Item>
         </Form>
       </Modal>
