@@ -470,7 +470,7 @@ const Home = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900">
+    <div className="min-h-screen flex flex-col overflow-x-hidden bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900">
       <Navbar />
       
       {/* Welcome Section */}
@@ -735,7 +735,7 @@ const Home = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-grow overflow-y-auto">
+      <div className="flex-grow overflow-y-auto overflow-x-hidden">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           {/* View Plans Section */}
           {!latestPayment && !isLoadingPayment && user && !isAdmin && (

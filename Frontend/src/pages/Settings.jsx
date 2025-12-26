@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiUser, FiLock, FiMail, FiPhone, FiCalendar, FiSave, FiKey, FiUserCheck } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { updateUserDetails, getCurrentUser, completeProfile } from '../utils/api';
+import { updateUserDetails, getCurrentUser, completeProfile, changePassword } from '../utils/api';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -179,23 +179,7 @@ const Settings = () => {
     
     try {
       // Call the API to change password
-      const response = await fetch(`${process.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/change-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to change password');
-      }
+      await changePassword(passwordData.currentPassword, passwordData.newPassword);
       
       // Reset form on success
       setPasswordData({
