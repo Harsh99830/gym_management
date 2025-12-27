@@ -442,7 +442,7 @@ const Home = () => {
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-200/30 via-transparent to-transparent"></div>
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070')] opacity-5 mix-blend-overlay"></div>
+        <div className="absolute inset-0 opacity-5 mix-blend-overlay"></div>
         
         {/* Animated dots */}
         <div className="absolute inset-0 opacity-10">

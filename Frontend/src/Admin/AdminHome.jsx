@@ -606,7 +606,7 @@ const Home = () => {
     
     setIsLoadingPayments(true);
     try {
-      // Get all payments for this user
+      // Get all payments
       const response = await getSuccessfulPayments();
       
       // Log the response to understand its structure
@@ -616,52 +616,69 @@ const Home = () => {
       let payments = [];
       if (Array.isArray(response)) {
         payments = response;
-      } else if (response && response.data && Array.isArray(response.data)) {
+      } else if (response?.data && Array.isArray(response.data)) {
         payments = response.data;
-      } else if (response && response.payments && Array.isArray(response.payments)) {
+      } else if (response?.payments && Array.isArray(response.payments)) {
         payments = response.payments;
-      } else if (response && response.transactions && Array.isArray(response.transactions)) {
+      } else if (response?.transactions && Array.isArray(response.transactions)) {
         payments = response.transactions;
       }
       
       // Log the extracted payments for debugging
       console.log('Extracted payments:', payments);
       
-      // Log the selected user's email for debugging
-      console.log('Selected user email:', selectedUser.email);
+      // Get user email in lowercase for comparison
+      const userEmail = selectedUser.email?.toLowerCase().trim();
+      console.log('Selected user email:', userEmail);
       
-      // Log the first payment object to see its structure
-      if (payments.length > 0) {
-        console.log('Full payment object structure:', JSON.parse(JSON.stringify(payments[0], null, 2)));
-        console.log('All payment objects:', payments);
-      }
-      
-      // Filter payments for the current user by email
+      // Filter payments for the current user by email and payment status
       const userPayments = payments.filter(payment => {
         if (!payment) return false;
         
-        // Get user email in lowercase
-        const userEmail = selectedUser.email?.toLowerCase().trim();
+        // Check if payment is PAID
+        const isPaid = [
+          payment.orderStatus,
+          payment.paymentStatus,
+          payment.status,
+          payment.payment?.status,
+          payment.data?.payment?.status
+        ].some(status => String(status || '').toUpperCase() === 'PAID');
+        
+        if (!isPaid) {
+          console.log('Skipping non-PAID payment:', payment.orderId || payment.payment_id);
+          return false;
+        }
         
         // Try to find email in various possible locations
         let paymentEmail = '';
         
         // Function to search for email in an object recursively
         const findEmailInObject = (obj, depth = 0) => {
-          if (depth > 3) return null; // Prevent infinite recursion
+          if (depth > 3) return null;
           if (!obj || typeof obj !== 'object') return null;
           
           // Check common email field names
-          const emailFields = ['email', 'customerEmail', 'customer_email', 'userEmail', 'user_email'];
+          const emailFields = [
+            'email', 'customerEmail', 'customer_email', 
+            'userEmail', 'user_email', 'customer.email',
+            'user.email', 'customerEmailId', 'customerEmailID'
+          ];
+          
           for (const field of emailFields) {
-            if (obj[field] && typeof obj[field] === 'string' && obj[field].includes('@')) {
-              return obj[field];
+            // Handle nested fields (e.g., 'customer.email')
+            if (field.includes('.')) {
+              const [parent, child] = field.split('.');
+              if (obj[parent]?.[child]) {
+                return String(obj[parent][child]).toLowerCase().trim();
+              }
+            } else if (obj[field]) {
+              return String(obj[field]).toLowerCase().trim();
             }
           }
           
           // Recursively search in nested objects
           for (const key in obj) {
-            if (typeof obj[key] === 'object' && obj[key] !== null) {
+            if (obj[key] && typeof obj[key] === 'object') {
               const found = findEmailInObject(obj[key], depth + 1);
               if (found) return found;
             }
@@ -673,35 +690,35 @@ const Home = () => {
         // Search for email in the payment object
         paymentEmail = findEmailInObject(payment) || '';
         
-        // Log the search result
-        console.log('Found email in payment object:', paymentEmail);
-        
-        // Log each payment email for debugging
-        console.log('Payment object:', {
-          paymentId: payment.id || payment._id || payment.payment_id,
-          allKeys: Object.keys(payment),
-          paymentEmail,
-          userEmail
-        });
-        
-        // Check for email match
+        // Check for email match (case-insensitive and trimmed)
         const isMatch = userEmail && paymentEmail && paymentEmail === userEmail;
         
         if (isMatch) {
-          console.log('Found matching payment:', payment);
+          console.log('Found matching PAID payment:', {
+            paymentId: payment.orderId || payment.payment_id,
+            amount: payment.orderAmount || payment.amount,
+            status: payment.orderStatus || payment.paymentStatus || payment.status,
+            email: paymentEmail
+          });
         }
         
         return isMatch;
       });
       
-      // Log the filtered results
-      console.log('Filtered user payments:', userPayments);
+      // Sort by date (newest first)
+      userPayments.sort((a, b) => {
+        const dateA = new Date(a.createdAt || a.paymentDate || 0);
+        const dateB = new Date(b.createdAt || b.paymentDate || 0);
+        return dateB - dateA;
+      });
+      
+      console.log('Filtered PAID user payments:', userPayments);
       
       setPaymentHistory(userPayments);
       setShowPaymentHistory(true);
       
       if (userPayments.length === 0) {
-        message.info('No payment history found for this user');
+        message.info('No paid orders found for this user');
       }
     } catch (error) {
       console.error('Error fetching payment history:', error);
