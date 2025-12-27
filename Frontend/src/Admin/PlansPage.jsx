@@ -8,7 +8,10 @@ const PlansPage = () => {
   const [loading, setLoading] = useState(false);
   const [showAddPlanModal, setShowAddPlanModal] = useState(false);
   const [showEditPlanModal, setShowEditPlanModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editingPlan, setEditingPlan] = useState(null);
+  const [deletingPlanId, setDeletingPlanId] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
 
@@ -56,24 +59,27 @@ const PlansPage = () => {
     }
   };
 
-  const handleDeletePlan = (planId) => {
-    Modal.confirm({
-      title: 'Delete Plan',
-      content: 'Are you sure you want to delete this plan?',
-      okText: 'Delete',
-      okType: 'danger',
-      cancelText: 'Cancel',
-      onOk: async () => {
-        try {
-          await deletePlan(planId);
-          message.success('Plan deleted successfully');
-          await fetchPlans();
-        } catch (error) {
-          console.error('Error deleting plan:', error);
-          message.error(error.response?.data?.message || 'Failed to delete plan');
-        }
-      },
-    });
+  const openDeleteModal = (planId) => {
+    setDeletingPlanId(planId);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeletePlan = async () => {
+    if (!deletingPlanId) return;
+    
+    try {
+      setDeleteLoading(true);
+      await deletePlan(deletingPlanId);
+      message.success('Plan deleted successfully');
+      setShowDeleteModal(false);
+      setDeletingPlanId(null);
+      await fetchPlans();
+    } catch (error) {
+      console.error('Error deleting plan:', error);
+      message.error(error.response?.data?.message || 'Failed to delete plan');
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const openEditModal = (plan) => {
@@ -113,11 +119,25 @@ const PlansPage = () => {
           {plans.map(plan => (
             <Card
               key={plan._id}
-              title={plan.planType}
+              title={plan.planType.toUpperCase()}
               className="shadow-md"
               actions={[
-                <EditOutlined key="edit" onClick={() => openEditModal(plan)} />,
-                <DeleteOutlined key="delete" onClick={() => handleDeletePlan(plan._id)} />
+                <EditOutlined 
+                  key="edit" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openEditModal(plan);
+                  }} 
+                  style={{ fontSize: '16px', padding: '0 8px', cursor: 'pointer' }}
+                />,
+                <DeleteOutlined
+                  key="delete"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openDeleteModal(plan._id);
+                  }}
+                  style={{ color: '#ff4d4f', fontSize: '16px', padding: '0 8px', cursor: 'pointer' }}
+                />
               ]}
             >
               <div className="space-y-3">
@@ -132,7 +152,7 @@ const PlansPage = () => {
       {/* Add Plan Modal */}
       <Modal
         title="Add New Plan"
-        visible={showAddPlanModal}
+        open={showAddPlanModal}
         onCancel={() => {
           setShowAddPlanModal(false);
           form.resetFields();
@@ -173,7 +193,7 @@ const PlansPage = () => {
       {/* Edit Plan Modal */}
       <Modal
         title="Edit Plan"
-        visible={showEditPlanModal}
+        open={showEditPlanModal}
         onCancel={() => {
           setShowEditPlanModal(false);
           editForm.resetFields();
@@ -210,6 +230,23 @@ const PlansPage = () => {
             <InputNumber min={1} style={{ width: '100%' }} />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        title="Delete Plan"
+        open={showDeleteModal}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setDeletingPlanId(null);
+        }}
+        onOk={handleDeletePlan}
+        okText="Delete"
+        cancelText="Cancel"
+        okButtonProps={{ danger: true, loading: deleteLoading }}
+        cancelButtonProps={{ disabled: deleteLoading }}
+      >
+        <p>Are you sure you want to delete this plan? This action cannot be undone.</p>
       </Modal>
     </div>
   );
