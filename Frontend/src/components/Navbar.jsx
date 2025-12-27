@@ -274,33 +274,16 @@ const Navbar = () => {
             ))}
           </nav>
 
-          {/* User Profile Section */}
+          {/* Sign Out Button */}
           <div className="p-4 border-t border-gray-200">
             {user || isAdmin ? (
-              <div className="space-y-2">
-                <div className="flex items-center px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-300 shadow-sm">
-                  <div className="flex-shrink-0">
-                    <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
-                      {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                    </div>
-                  </div>
-                  <div className="ml-3 min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {user?.name || 'User'}
-                    </p>
-                    <p className="text-xs text-gray-500 truncate">
-                      {isAdmin ? (adminContext?.adminEmail || 'Admin') : (user?.email || 'user@example.com')}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="group flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-lg transition-all duration-300 ease-in-out hover:shadow-sm hover:-translate-y-0.5"
-                >
-                  <FiLogOut className="mr-3 h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
-                  Sign Out
-                </button>
-              </div>
+              <button
+                onClick={handleLogout}
+                className="group flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-lg transition-all duration-300 ease-in-out hover:shadow-sm hover:-translate-y-0.5"
+              >
+                <FiLogOut className="mr-3 h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
+                Sign Out
+              </button>
             ) : (
               <div className="space-y-2">
                 <Link

@@ -8,6 +8,8 @@ import TerminatedUsers from './TerminatedUsers';
 import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
 import { useAdmin } from '../context/AdminContext';
+import { Pause } from "lucide-react";
+
 
 // Helper to categorize users
 const categorizeUsers = (users) => {
@@ -1278,13 +1280,7 @@ const Home = () => {
                       title="Suspend Account"
                       disabled={actionLoading === 'suspend'}
                     >
-                      {actionLoading === 'suspend' ? (
-                        <svg className="animate-spin h-4 w-4 text-yellow-600" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M10 2a1 1 0 00-1 1v6H5a1 1 0 000 2h4v6a1 1 0 002 0v-6h4a1 1 0 000-2h-4V3a1 1 0 00-1-1z" />
-                        </svg>
-                      )}
+                      <Pause size={18} />
                     </button>
                   )}
                   <button 

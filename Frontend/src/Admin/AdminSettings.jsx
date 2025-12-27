@@ -18,18 +18,19 @@ const api = axios.create({
 
 const AdminSettings = () => {
   const [email, setEmail] = useState('');
-  const [websiteName, setWebsiteName] = useState('Gym Pro');
+  const [websiteLogo, setWebsiteLogo] = useState(null);
+  const [logoPreview, setLogoPreview] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [admins, setAdmins] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
   const [isLoadingAdmins, setIsLoadingAdmins] = useState(true);
   const [showAddAdminModal, setShowAddAdminModal] = useState(false);
   const [newAdminEmail, setNewAdminEmail] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState(null);
   const [editEmail, setEditEmail] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingAdmin, setDeletingAdmin] = useState(null);
+  const [admins, setAdmins] = useState([]);
 
   // Fetch admin list on component mount
   useEffect(() => {
@@ -206,28 +207,47 @@ const AdminSettings = () => {
     }
   };
 
-  const handleUpdateWebsiteName = async (e) => {
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setWebsiteLogo(file);
+      setLogoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleUpdateWebsiteLogo = async (e) => {
     e.preventDefault();
-    if (!websiteName.trim()) {
-      toast.error('Website name cannot be empty');
+    if (!websiteLogo) {
+      toast.error('Please select an image to upload');
       return;
     }
 
-    setIsLoading(true);
+    setIsSaving(true);
+
+    const formData = new FormData();
+    formData.append('logo', websiteLogo);
+
     try {
-      const response = await axios.put('/api/admin/website-name', { name: websiteName });
+      const response = await axios.put('/api/admin/website-logo', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
       if (response.data.success) {
-        toast.success('Website name updated successfully');
-        // Update the title in the browser tab
-        document.title = websiteName;
+        toast.success('Website logo updated successfully');
+        // Reset the file input and preview
+        setWebsiteLogo(null);
+        setLogoPreview('');
+        document.getElementById('logo-upload').value = '';
       } else {
-        throw new Error(response.data.message || 'Failed to update website name');
+        throw new Error(response.data.message || 'Failed to update website logo');
       }
     } catch (error) {
-      console.error('Error updating website name:', error);
-      toast.error(error.response?.data?.message || 'Failed to update website name');
+      console.error('Error updating website logo:', error);
+      toast.error(error.response?.data?.message || 'Failed to update website logo');
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -327,39 +347,94 @@ const AdminSettings = () => {
               </p>
             </div>
             <div className="px-6 py-6">
-              <form onSubmit={handleUpdateWebsiteName} className="space-y-6">
+              <form onSubmit={handleUpdateWebsiteLogo} className="space-y-6">
                 <div className="space-y-2">
-                  <label htmlFor="websiteName" className="block text-sm font-medium text-gray-700">
-                    Website Name
+                  <label className="block text-sm font-medium text-gray-700">
+                    Website Logo
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiSettings className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="text"
-                      id="websiteName"
-                      value={websiteName}
-                      onChange={(e) => setWebsiteName(e.target.value)}
-                      className="focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-12 py-3 sm:text-sm border border-gray-300 rounded-md shadow-sm"
-                      placeholder="Enter your website name"
-                      required
-                    />
+                  <div className="mt-1 flex items-center">
+                    {logoPreview ? (
+                      <div className="relative">
+                        <img
+                          src={logoPreview}
+                          alt="Logo preview"
+                          className="h-20 w-auto object-contain"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLogoPreview('');
+                            setWebsiteLogo(null);
+                            document.getElementById('logo-upload').value = '';
+                          }}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center w-full">
+                        <div className="flex items-center justify-center w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg">
+                          <div className="text-center">
+                            <svg
+                              className="mx-auto h-10 w-10 text-gray-400"
+                              stroke="currentColor"
+                              fill="none"
+                              viewBox="0 0 48 48"
+                              aria-hidden="true"
+                            >
+                              <path
+                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                strokeWidth={2}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="mt-4 flex text-sm text-gray-600">
+                          <label
+                            htmlFor="logo-upload"
+                            className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none"
+                          >
+                            <span className="text-gray-400">Upload a file (disabled)</span>
+                            <input
+                              id="logo-upload"
+                              name="logo-upload"
+                              type="file"
+                              className="sr-only"
+                              accept="image/*"
+                              onChange={handleLogoChange}
+                              disabled
+                            />
+                          </label>
+                        </div>
+                        <p className="text-xs text-gray-400">Logo upload is currently disabled</p>
+                      </div>
+                    )}
                   </div>
-                  <p className="mt-2 text-sm text-gray-500">
-                    This name will appear in the browser tab and email communications.
-                  </p>
                 </div>
-                <div className="flex justify-end pt-2">
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className={`inline-flex items-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
-                  >
-                    <FiSave className="mr-2 h-4 w-4" />
-                    {isLoading ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </div>
+                {false && logoPreview && (
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={isSaving}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSaving ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Uploading...
+                        </>
+                      ) : 'Upload Logo'}
+                    </button>
+                  </div>
+                )}
               </form>
             </div>
           </div>
