@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Form, Input, Select, message, Modal } from 'antd';
+import { Card, Button, Form, Input, Select, InputNumber, message, Modal, Spin } from 'antd';
 import { TagOutlined, PlusOutlined, EditOutlined, DeleteOutlined, PercentageOutlined } from '@ant-design/icons';
 import { getAllCoupons, createCoupon, updateCoupon, deleteCoupon } from '../utils/api';
 
@@ -10,10 +10,12 @@ const CouponsPage = () => {
   const [loading, setLoading] = useState(false);
   const [showAddCouponModal, setShowAddCouponModal] = useState(false);
   const [showEditCouponModal, setShowEditCouponModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState(null);
+  const [deletingCouponId, setDeletingCouponId] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
-  const [modal, modalContextHolder] = Modal.useModal();
 
   useEffect(() => {
     fetchCoupons();
@@ -37,28 +39,18 @@ const CouponsPage = () => {
       const { code, discountType, discountValue } = values;
       const discount = discountValue.toString();
       
-      const created = await createCoupon({ code, discount, discountType });
+      await createCoupon({ code, discount, discountType });
       message.success('Coupon created successfully');
-      modal.success({
-        title: 'Coupon Created',
-        content: (
-          <div>
-            <p><strong>Code:</strong> {created?.code}</p>
-            <p><strong>Discount:</strong> {created?.discount}{created?.discountType === 'percentage' ? '%' : ''}</p>
-            <p><strong>Type:</strong> {created?.discountType === 'percentage' ? 'Percentage' : 'Fixed Amount'}</p>
-          </div>
-        ),
-      });
       setShowAddCouponModal(false);
       form.resetFields();
-      fetchCoupons();
+      await fetchCoupons();
     } catch (error) {
       console.error('Error creating coupon:', error);
-      message.error('Failed to create coupon');
+      message.error(error.response?.data?.message || 'Failed to create coupon');
     }
   };
 
-  const handleEditCoupon = async (values) => {
+  const handleUpdateCoupon = async (values) => {
     try {
       const { code, discountType, discountValue } = values;
       const discount = discountValue.toString();
@@ -68,33 +60,38 @@ const CouponsPage = () => {
       setShowEditCouponModal(false);
       editForm.resetFields();
       setEditingCoupon(null);
-      fetchCoupons();
+      await fetchCoupons();
     } catch (error) {
       console.error('Error updating coupon:', error);
-      message.error('Failed to update coupon');
+      message.error(error.response?.data?.message || 'Failed to update coupon');
     }
   };
 
-  const handleDeleteCoupon = async (couponId) => {
+  const openDeleteModal = (couponId) => {
+    setDeletingCouponId(couponId);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteCoupon = async () => {
+    if (!deletingCouponId) return;
+    
     try {
-      if (window.confirm('Are you sure you want to delete this coupon?')) {
-        await deleteCoupon(couponId);
-        message.success('Coupon deleted successfully');
-        if (showEditCouponModal) {
-          setShowEditCouponModal(false);
-          setEditingCoupon(null);
-        }
-        fetchCoupons();
-      }
+      setDeleteLoading(true);
+      await deleteCoupon(deletingCouponId);
+      message.success('Coupon deleted successfully');
+      setShowDeleteModal(false);
+      setDeletingCouponId(null);
+      await fetchCoupons();
     } catch (error) {
       console.error('Error deleting coupon:', error);
-      message.error('Failed to delete coupon');
+      message.error(error.response?.data?.message || 'Failed to delete coupon');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
   const openEditModal = (coupon) => {
     setEditingCoupon(coupon);
-    
     editForm.setFieldsValue({
       code: coupon.code,
       discountType: coupon.discountType || 'amount',
@@ -103,128 +100,71 @@ const CouponsPage = () => {
     setShowEditCouponModal(true);
   };
 
-  const formatDiscount = (coupon) => {
-    if (coupon.discountType === 'percentage') {
-      return (
-        <span className="flex items-center justify-center gap-1">
-          <PercentageOutlined className="text-green-400" />
-          {coupon.discount}%
-        </span>
-      );
-    } else {
-      return (
-        <span className="flex items-center justify-center gap-1">
-          ₹{coupon.discount}
-        </span>
-      );
-    }
-  };
-
-  if (loading) {
+  if (loading && coupons.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-white text-xl">Loading...</div>
+        <Spin size="large" />
+        <span className="ml-4 text-xl">Loading coupons...</span>
       </div>
     );
   }
 
   return (
-    <>
-      {modalContextHolder}
-      <div className="min-h-screen p-6 bg-white text-gray-900">
-        <div className="max-w-7xl mx-auto">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <TagOutlined className="text-3xl text-orange-600" />
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Coupon Management</h1>
-                  {coupons.length > 0 && (
-                    <p className="text-sm text-gray-600 mt-1">
-                      Total: {coupons.length} coupons available
-                    </p>
-                  )}
-                </div>
-              </div>
-              <button
-                onClick={() => setShowAddCouponModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-              >
-                <PlusOutlined />
-                <span>Add Coupon</span>
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {coupons.map((coupon, index) => (
-                <Card
-                  key={coupon._id || index}
-                  className="cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border border-gray-200 rounded-xl bg-white relative group"
-                  onClick={() => openEditModal(coupon)}
-                  styles={{ body: { padding: '24px' } }}
-                >
-                  <div className="absolute top-3 right-3 flex gap-1">
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<EditOutlined />}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openEditModal(coupon);
-                      }}
-                      className="text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-                    />
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<DeleteOutlined />}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteCoupon(coupon._id);
-                      }}
-                      className="text-red-600 hover:bg-red-50"
-                    />
-                  </div>
+    <div className="min-h-screen p-6 bg-white text-gray-900">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Coupons Management</h1>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setShowAddCouponModal(true)}
+          >
+            Add Coupon
+          </Button>
+        </div>
 
-                  <div className="text-center space-y-4">
-                    <div className="text-4xl p-4 bg-orange-50 text-orange-600 rounded-full mx-auto w-fit">
-                      <TagOutlined />
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-xl font-semibold text-gray-900 mb-3 font-mono tracking-wider">
-                        {coupon.code}
-                      </h4>
-                      
-                      <div className="space-y-2">
-                        <div className="text-3xl font-bold text-green-600">
-                          {formatDiscount(coupon)}
-                        </div>
-                        
-                        <div className="text-gray-600 text-xs">
-                          {coupon.discountType === 'percentage' ? 'Percentage Discount' : 'Fixed Amount Discount'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-            
-            {coupons.length === 0 && !loading && (
-              <div className="text-center py-20">
-                <TagOutlined className="text-8xl text-gray-300 mb-4" />
-                <p className="text-gray-500 text-xl">No coupons available</p>
-                <button
-                  onClick={() => setShowAddCouponModal(true)}
-                  className="mt-6 flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors mx-auto"
-                >
-                  <PlusOutlined />
-                  <span>Create Your First Coupon</span>
-                </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {coupons.map(coupon => (
+            <Card
+              key={coupon._id}
+              title={coupon.code}
+              className="shadow-md"
+              actions={[
+                <EditOutlined 
+                  key="edit" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openEditModal(coupon);
+                  }} 
+                  style={{ fontSize: '16px', padding: '0 8px', cursor: 'pointer' }}
+                />,
+                <DeleteOutlined
+                  key="delete"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openDeleteModal(coupon._id);
+                  }}
+                  style={{ color: '#ff4d4f', fontSize: '16px', padding: '0 8px', cursor: 'pointer' }}
+                />
+              ]}
+            >
+              <div className="space-y-3">
+                <p className="text-lg font-semibold">
+                  {coupon.discountType === 'percentage' ? (
+                    <span className="flex items-center gap-1">
+                      <PercentageOutlined />
+                      {coupon.discount}%
+                    </span>
+                  ) : (
+                    <span>₹{coupon.discount}</span>
+                  )}
+                </p>
+                <p className="text-gray-600">
+                  {coupon.discountType === 'percentage' ? 'Percentage Discount' : 'Fixed Amount'}
+                </p>
               </div>
-            )}
-          </div>
+            </Card>
+          ))}
         </div>
       </div>
 
@@ -236,18 +176,13 @@ const CouponsPage = () => {
           setShowAddCouponModal(false);
           form.resetFields();
         }}
-        footer={null}
-        width={500}
+        onOk={() => form.submit()}
+        okText="Create"
       >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleAddCoupon}
-          className="space-y-4"
-        >
+        <Form form={form} onFinish={handleAddCoupon} layout="vertical">
           <Form.Item
-            label="Coupon Code"
             name="code"
+            label="Coupon Code"
             rules={[{ required: true, message: 'Please enter coupon code' }]}
           >
             <Input 
@@ -258,10 +193,9 @@ const CouponsPage = () => {
               }}
             />
           </Form.Item>
-          
           <Form.Item
-            label="Discount Type"
             name="discountType"
+            label="Discount Type"
             rules={[{ required: true, message: 'Please select discount type' }]}
           >
             <Select placeholder="Select discount type">
@@ -269,69 +203,36 @@ const CouponsPage = () => {
               <Option value="amount">Fixed Amount (₹)</Option>
             </Select>
           </Form.Item>
-          
           <Form.Item
-            label="Discount Value"
             name="discountValue"
+            label="Discount Value"
             rules={[{ required: true, message: 'Please enter discount value' }]}
           >
-            <Input
-              type="number"
-              placeholder="e.g., 20 for 20% or 100 for ₹100"
+            <InputNumber
+              style={{ width: '100%' }}
               min={1}
+              placeholder="e.g., 20 for 20% or 100 for ₹100"
             />
           </Form.Item>
-          
-          <div className="flex justify-end gap-3 pt-4">
-            <Button onClick={() => {
-              setShowAddCouponModal(false);
-              form.resetFields();
-            }}>
-              Cancel
-            </Button>
-            <Button type="primary" htmlType="submit">
-              Create Coupon
-            </Button>
-          </div>
         </Form>
       </Modal>
 
       {/* Edit Coupon Modal */}
       <Modal
-        title={
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {editingCoupon && (
-                <Button
-                  danger
-                  type="text"
-                  icon={<DeleteOutlined />}
-                  onClick={() => handleDeleteCoupon(editingCoupon._id)}
-                  title="Delete Coupon"
-                />
-              )}
-              <span>Edit Coupon</span>
-            </div>
-          </div>
-        }
+        title="Edit Coupon"
         open={showEditCouponModal}
         onCancel={() => {
           setShowEditCouponModal(false);
           editForm.resetFields();
           setEditingCoupon(null);
         }}
-        footer={null}
-        width={500}
+        onOk={() => editForm.submit()}
+        okText="Save Changes"
       >
-        <Form
-          form={editForm}
-          layout="vertical"
-          onFinish={handleEditCoupon}
-          className="space-y-4"
-        >
+        <Form form={editForm} onFinish={handleUpdateCoupon} layout="vertical">
           <Form.Item
-            label="Coupon Code"
             name="code"
+            label="Coupon Code"
             rules={[{ required: true, message: 'Please enter coupon code' }]}
           >
             <Input 
@@ -342,10 +243,9 @@ const CouponsPage = () => {
               }}
             />
           </Form.Item>
-          
           <Form.Item
-            label="Discount Type"
             name="discountType"
+            label="Discount Type"
             rules={[{ required: true, message: 'Please select discount type' }]}
           >
             <Select placeholder="Select discount type">
@@ -353,34 +253,37 @@ const CouponsPage = () => {
               <Option value="amount">Fixed Amount (₹)</Option>
             </Select>
           </Form.Item>
-          
           <Form.Item
-            label="Discount Value"
             name="discountValue"
+            label="Discount Value"
             rules={[{ required: true, message: 'Please enter discount value' }]}
           >
-            <Input
-              type="number"
-              placeholder="e.g., 20 for 20% or 100 for ₹100"
+            <InputNumber
+              style={{ width: '100%' }}
               min={1}
+              placeholder="e.g., 20 for 20% or 100 for ₹100"
             />
           </Form.Item>
-          
-          <div className="flex justify-end gap-3 pt-4">
-            <Button onClick={() => {
-              setShowEditCouponModal(false);
-              editForm.resetFields();
-              setEditingCoupon(null);
-            }}>
-              Cancel
-            </Button>
-            <Button type="primary" htmlType="submit">
-              Update Coupon
-            </Button>
-          </div>
         </Form>
       </Modal>
-    </>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        title="Delete Coupon"
+        open={showDeleteModal}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setDeletingCouponId(null);
+        }}
+        onOk={handleDeleteCoupon}
+        okText="Delete"
+        cancelText="Cancel"
+        okButtonProps={{ danger: true, loading: deleteLoading }}
+        cancelButtonProps={{ disabled: deleteLoading }}
+      >
+        <p>Are you sure you want to delete this coupon? This action cannot be undone.</p>
+      </Modal>
+    </div>
   );
 };
 
